@@ -1,6 +1,4 @@
-<?php
-include_once __DIR__ . '/auth.php';
-?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,8 +16,18 @@ include_once __DIR__ . '/auth.php';
     <div class="row justify-content-center">
         <div class="col-sm-6 pt-4">
             <h2>User Dashboard</h2>
-           <?php echo $_SESSION['user_name']; ?>
-            <a href="logout.php" class="btn btn-dark btn-sm">Logout</a>
+       <p><?php echo $_SESSION['user_name'] ?? ''; ?></p>
+       <?php if (!empty($posts)) : ?>
+        <div class="list-group mb-3">
+          <?php foreach ($posts as $post) : ?>
+            <div class="list-group-item">
+              <h5 class="mb-1"><?php echo htmlspecialchars($post['title']); ?></h5>
+              <p class="mb-1"><?php echo htmlspecialchars($post['content']); ?></p>
+            </div>
+          <?php endforeach; ?>
+        </div>
+       <?php endif; ?>
+            <a href="logout" class="btn btn-dark btn-sm">Logout</a>
     
    
 

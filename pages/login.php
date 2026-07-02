@@ -1,24 +1,3 @@
-<?php 
-session_start();
-require_once __DIR__ . '/app/user.php';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-  $user= new user();
-   $user->email = $_POST['email'];
-   $user->password = $_POST['password'];
-
-if ($user->login()) {
-$_SESSION['user_id'] = $user->Id;
-$_SESSION['user_name'] = $user->name;
-
-
-header("Location: Dashboard.php");
-exit();
-} else {
-  echo "Error login user.";
-}
-}
-?>
 
 
 <!DOCTYPE html>
@@ -40,7 +19,7 @@ exit();
 
 
             <h2>Login form</h2>
-            <form action="login.php" method ="post">
+            <form action="/submit-login" method ="post">
                 <div class="form-group">
                     <label for="email">Email:</label>
       <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">

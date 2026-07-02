@@ -1,5 +1,7 @@
 <?php
 namespace App\Config;
+use PDO;
+use PDOException;
 class Database {
     private $host = "localhost";
     private $db_name = "authdb";
@@ -29,5 +31,21 @@ private function ensurePasswordColumnCanStoreHashes(): void {
   // Ignore schema changes when the column already matches or the table cannot be altered.
  }
 }
+
+public function fetchdata($query, $params = []) {
+   try{
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+   }
+    catch(PDOException $e) {
+      
+      return false;
+    }
 }
-?>
+public function fetchsingle($query){
+  $stmt = $this->conn->query($query);
+  return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+}
