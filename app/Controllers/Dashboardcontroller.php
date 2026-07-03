@@ -24,7 +24,7 @@ if (ini_get('session.use_cookies')) {
 	);
 }
 session_destroy();
-header('Location: login');
+header('Location: /login');
 exit();
 
     }

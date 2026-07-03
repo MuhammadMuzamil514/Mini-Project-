@@ -27,7 +27,7 @@
           <?php endforeach; ?>
         </div>
        <?php endif; ?>
-            <a href="logout" class="btn btn-dark btn-sm">Logout</a>
+            <a href="/logout" class="btn btn-dark btn-sm">Logout</a>
     
    
 

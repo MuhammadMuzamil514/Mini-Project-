@@ -5,7 +5,7 @@ class logincontroller{
     public function index(){
 
         $user=new user();
-       $data = $user->fetchData("SELECT * FROM users");
+     $data = $user->fetchdata("SELECT * FROM users");
 
         require( 'pages/login.php');
         
