@@ -1,31 +1,52 @@
 <?php
+
 namespace App\Controllers;
 
-class Dashboardcontroller{
-    public function index(){
+use App\Models\Post;
 
-    $posts= [
-        ['id'=>1,'title'=>'Post 1','content'=>'Content of post 1'],
-        ['id'=>2,'title'=>'Post 2','content'=>'Content of post 2'],
-        ['id'=>3,'title'=>'Post 3','content'=>'Content of post 3'],
-    ];
-        view('Dashboard', ['posts' => $posts]);
-        
+class Dashboardcontroller
+{
+    public function index()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $postModel = new Post();
+        $userId = $_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? null;
+        $posts = $userId ? $postModel->byUser((int)$userId) : $postModel->all();
+
+        \view('Dashboard', ['user_posts' => $posts]);
     }
 
-    public function logout(){
-$_SESSION = [];
+    public function store()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-if (ini_get('session.use_cookies')) {
-	$params = session_get_cookie_params();
-	setcookie(session_name(), '', time() - 42000,
-		$params['path'], $params['domain'],
-		$params['secure'], $params['httponly']
-	);
-}
-session_destroy();
-header('Location: /login');
-exit();
+        $title = trim($_POST['title'] ?? '');
+        $content = trim($_POST['content'] ?? '');
+        $userId = $_SESSION['user']['id'] ?? $_SESSION['user_id'] ?? null;
 
+        if ($title === '' || $content === '' || !$userId) {
+            \redirect('/dashboard?error=Invalid+data');
+        }
+
+        $postModel = new Post();
+        $ok = $postModel->create($title, $content, (int)$userId);
+
+        \redirect('/dashboard' . ($ok ? '?success=Saved' : '?error=Save+failed'));
+    }
+
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+        session_destroy();
+        \redirect('/login');
     }
 }

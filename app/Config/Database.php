@@ -1,51 +1,85 @@
 <?php
+
+
 namespace App\Config;
+
 use PDO;
 use PDOException;
-class Database {
-    private $host = "localhost";
-    private $db_name = "authdb";
-    private $username="root";
-    private $password="";
-public $conn ;
 
+class Database
+{
+    private string $host = 'localhost';
+    private string $db_name = 'posts';
+    private string $username = 'root';
+    private string $password = '';
 
-public function __construct(){
- $this->conn = null;
- try {
-  $this->conn = new PDO("mysql:host=$this->host;dbname=$this->db_name", $this->username, $this->password);
-  // set the PDO error mode to exception
-  $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  $this->ensurePasswordColumnCanStoreHashes();
+    public ?PDO $conn = null;
 
-} catch(PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
-}
-
-}
-
-private function ensurePasswordColumnCanStoreHashes(): void {
- try {
-  $this->conn->exec("ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL");
- } catch (PDOException $e) {
-  // Ignore schema changes when the column already matches or the table cannot be altered.
- }
-}
-
-public function fetchdata($query, $params = []) {
-   try{
-
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute($params);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-   }
-    catch(PDOException $e) {
-      
-      return false;
+    public function __construct()
+    {
+        try {
+            $dsn = "mysql:host={$this->host};dbname={$this->db_name};charset=utf8mb4";
+            $this->conn = new PDO($dsn, $this->username, $this->password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            $this->conn = null;
+            error_log('Database connection failed: ' . $e->getMessage());
+        }
     }
-}
-public function fetchsingle($query){
-  $stmt = $this->conn->query($query);
-  return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+
+    public function fetchdata(string $query, array $params = []): array
+    {
+        if (!$this->conn) {
+            return [];
+        }
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('fetchdata error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function fetchsingle(string $query, array $params = []): ?array
+    {
+        if (!$this->conn) {
+            return null;
+        }
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            $row = $stmt->fetch();
+            return $row ?: null;
+        } catch (PDOException $e) {
+            error_log('fetchsingle error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function execute(string $query, array $params = []): bool
+    {
+        if (!$this->conn) {
+            return false;
+        }
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            error_log('execute error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function lastInsertId(): string
+    {
+        return $this->conn ? $this->conn->lastInsertId() : '0';
+    }
 }

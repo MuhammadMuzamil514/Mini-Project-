@@ -1,33 +1,45 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\user;
-class logincontroller{
-    public function index(){
 
-        $user=new user();
-     $data = $user->fetchdata("SELECT * FROM users");
+class logincontroller
+{
+    public function index()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        require( 'pages/login.php');
-        
+        \view('login');
     }
 
-    public function login(){
+    public function login()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-  $user= new user();
-   $user->email = $_POST['email'];
-   $user->password = $_POST['password'];
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            \redirect('/login');
+        }
 
-if ($user->login()) {
-$_SESSION['user_id'] = $user->Id;
-$_SESSION['user_name'] = $user->name;
+        $user = new user();
+        $user->email = trim($_POST['email'] ?? '');
+        $user->password = $_POST['password'] ?? '';
 
- require( 'pages/Dashboard.php');
-// header("Location: Dashboard.php");
-exit();
-} else {
-  echo "Error login user.";
-}
-}
+        if ($user->login()) {
+            $_SESSION['user_id'] = $user->Id ?? $user->id ?? null;
+            $_SESSION['user_name'] = $user->name ?? '';
+            $_SESSION['user'] = [
+                'id' => $user->Id ?? $user->id ?? null,
+                'name' => $user->name ?? '',
+            ];
+
+            \redirect('/dashboard');
+        }
+
+        \redirect('/login?error=Invalid+credentials');
     }
 }

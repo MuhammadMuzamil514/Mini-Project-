@@ -22,7 +22,6 @@
 ];
         
  }
-
     public static function handle (){
         $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
         $requestPath = self::normalizePath($requestUri);
