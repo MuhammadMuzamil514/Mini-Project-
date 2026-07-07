@@ -1,27 +1,6 @@
-<?php 
+<?php
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
-}
-require_once __DIR__ . '/../app/Models/user.php';
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
- $user = new \App\Models\user();
-
-   $user->name = $_POST['name'];
-   $user->email = $_POST['email'];
-  $user->password = $_POST['password'];
-
-
-if ($user->register()) {
-  $_SESSION['register_success'] = 'User registered successfully.';
-  header('Location: /register');
-  exit();
-} else {
-  $_SESSION['register_error'] = 'Error registering user.';
-  header('Location: /register');
-  exit();
-}
 }
 ?>
 
